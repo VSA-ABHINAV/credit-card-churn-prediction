@@ -1,0 +1,72 @@
+{
+  "model_type": "RandomForestClassifier",
+  "model_params": {
+    "n_estimators": 400,
+    "max_depth": 30,
+    "min_samples_split": 10,
+    "min_samples_leaf": 4,
+    "max_features": null,
+    "bootstrap": true,
+    "random_state": 42
+  },
+  "decision_threshold": 0.3,
+  "target_mapping": {
+    "Existing Customer": 0,
+    "Attrited Customer": 1
+  },
+  "dropped_columns": [
+    "CLIENTNUM",
+    "Attrition_Flag"
+  ],
+  "gender_encoding": {
+    "M": 1,
+    "F": 0
+  },
+  "categorical_columns": [
+    "Education_Level",
+    "Marital_Status",
+    "Income_Category",
+    "Card_Category"
+  ],
+  "numeric_columns": [
+    "Customer_Age",
+    "Gender",
+    "Dependent_count",
+    "Months_on_book",
+    "Total_Relationship_Count",
+    "Months_Inactive_12_mon",
+    "Contacts_Count_12_mon",
+    "Credit_Limit",
+    "Total_Revolving_Bal",
+    "Avg_Open_To_Buy",
+    "Total_Amt_Chng_Q4_Q1",
+    "Total_Trans_Amt",
+    "Total_Trans_Ct",
+    "Total_Ct_Chng_Q4_Q1",
+    "Avg_Utilization_Ratio"
+  ],
+  "expected_input_columns": [
+    "Customer_Age",
+    "Gender",
+    "Dependent_count",
+    "Education_Level",
+    "Marital_Status",
+    "Income_Category",
+    "Card_Category",
+    "Months_on_book",
+    "Total_Relationship_Count",
+    "Months_Inactive_12_mon",
+    "Contacts_Count_12_mon",
+    "Credit_Limit",
+    "Total_Revolving_Bal",
+    "Avg_Open_To_Buy",
+    "Total_Amt_Chng_Q4_Q1",
+    "Total_Trans_Amt",
+    "Total_Trans_Ct",
+    "Total_Ct_Chng_Q4_Q1",
+    "Avg_Utilization_Ratio"
+  ],
+  "training_rows": 10127,
+  "sklearn_version": "1.9.1",
+  "created_utc": "2026-10-24T14:41:48.514082+00:00"
+}

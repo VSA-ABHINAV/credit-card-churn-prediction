@@ -1,0 +1,127 @@
+{
+  "cv_results": {
+    "baseline_rf": {
+      "accuracy": {
+        "mean": 0.9547,
+        "std": 0.0078
+      },
+      "precision": {
+        "mean": 0.9235,
+        "std": 0.0166
+      },
+      "recall": {
+        "mean": 0.7827,
+        "std": 0.0391
+      },
+      "f1": {
+        "mean": 0.847,
+        "std": 0.0286
+      },
+      "roc_auc": {
+        "mean": 0.9871,
+        "std": 0.0033
+      }
+    },
+    "tuned_rf": {
+      "accuracy": {
+        "mean": 0.9585,
+        "std": 0.0063
+      },
+      "precision": {
+        "mean": 0.8963,
+        "std": 0.0216
+      },
+      "recall": {
+        "mean": 0.8395,
+        "std": 0.0328
+      },
+      "f1": {
+        "mean": 0.8666,
+        "std": 0.0216
+      },
+      "roc_auc": {
+        "mean": 0.9858,
+        "std": 0.0038
+      }
+    },
+    "logistic_regression": {
+      "accuracy": {
+        "mean": 0.9042,
+        "std": 0.0028
+      },
+      "precision": {
+        "mean": 0.7653,
+        "std": 0.0178
+      },
+      "recall": {
+        "mean": 0.5837,
+        "std": 0.0214
+      },
+      "f1": {
+        "mean": 0.6619,
+        "std": 0.0122
+      },
+      "roc_auc": {
+        "mean": 0.9246,
+        "std": 0.0075
+      }
+    }
+  },
+  "test_results": {
+    "tuned_rf_0_30": {
+      "accuracy": 0.9516,
+      "precision": 0.8162,
+      "recall": 0.9015,
+      "f1": 0.8567,
+      "roc_auc": 0.9844,
+      "specificity": 0.9612,
+      "tp": 293,
+      "fp": 66,
+      "tn": 1635,
+      "fn": 32
+    },
+    "tuned_rf_0_42": {
+      "accuracy": 0.9576,
+      "precision": 0.877,
+      "recall": 0.8554,
+      "f1": 0.866,
+      "roc_auc": 0.9844,
+      "specificity": 0.9771,
+      "tp": 278,
+      "fp": 39,
+      "tn": 1662,
+      "fn": 47
+    },
+    "baseline_rf_0_50": {
+      "accuracy": 0.958,
+      "precision": 0.9348,
+      "recall": 0.7938,
+      "f1": 0.8586,
+      "roc_auc": 0.9844,
+      "specificity": 0.9894,
+      "tp": 258,
+      "fp": 18,
+      "tn": 1683,
+      "fn": 67
+    },
+    "logistic_regression_0_50": {
+      "accuracy": 0.8998,
+      "precision": 0.7675,
+      "recall": 0.5385,
+      "f1": 0.6329,
+      "roc_auc": 0.9166,
+      "specificity": 0.9688,
+      "tp": 175,
+      "fp": 53,
+      "tn": 1648,
+      "fn": 150
+    }
+  },
+  "selected_model": "tuned_random_forest",
+  "selected_threshold": 0.3,
+  "exported_files": [
+    "final_model.joblib",
+    "final_model_config.json"
+  ],
+  "runtime_seconds": 59.88
+}

@@ -1,0 +1,127 @@
+{
+  "feature_importances": [
+    {
+      "feature": "Total_Trans_Amt",
+      "importance": 0.1813,
+      "percentage": 18.13,
+      "cumulative_percentage": 18.13
+    },
+    {
+      "feature": "Total_Trans_Ct",
+      "importance": 0.1608,
+      "percentage": 16.08,
+      "cumulative_percentage": 34.21
+    },
+    {
+      "feature": "Total_Ct_Chng_Q4_Q1",
+      "importance": 0.1032,
+      "percentage": 10.32,
+      "cumulative_percentage": 44.53
+    },
+    {
+      "feature": "Total_Revolving_Bal",
+      "importance": 0.1001,
+      "percentage": 10.01,
+      "cumulative_percentage": 54.54
+    },
+    {
+      "feature": "Avg_Utilization_Ratio",
+      "importance": 0.0706,
+      "percentage": 7.06,
+      "cumulative_percentage": 61.6
+    },
+    {
+      "feature": "Total_Relationship_Count",
+      "importance": 0.0668,
+      "percentage": 6.68,
+      "cumulative_percentage": 68.27
+    },
+    {
+      "feature": "Total_Amt_Chng_Q4_Q1",
+      "importance": 0.0627,
+      "percentage": 6.27,
+      "cumulative_percentage": 74.54
+    },
+    {
+      "feature": "Credit_Limit",
+      "importance": 0.0328,
+      "percentage": 3.28,
+      "cumulative_percentage": 77.82
+    },
+    {
+      "feature": "Avg_Open_To_Buy",
+      "importance": 0.0327,
+      "percentage": 3.27,
+      "cumulative_percentage": 81.1
+    },
+    {
+      "feature": "Customer_Age",
+      "importance": 0.0318,
+      "percentage": 3.18,
+      "cumulative_percentage": 84.27
+    },
+    {
+      "feature": "Contacts_Count_12_mon",
+      "importance": 0.0279,
+      "percentage": 2.79,
+      "cumulative_percentage": 87.06
+    },
+    {
+      "feature": "Months_Inactive_12_mon",
+      "importance": 0.0263,
+      "percentage": 2.63,
+      "cumulative_percentage": 89.69
+    },
+    {
+      "feature": "Months_on_book",
+      "importance": 0.0243,
+      "percentage": 2.43,
+      "cumulative_percentage": 92.12
+    },
+    {
+      "feature": "Education_Level",
+      "importance": 0.0202,
+      "percentage": 2.02,
+      "cumulative_percentage": 94.14
+    },
+    {
+      "feature": "Income_Category",
+      "importance": 0.017,
+      "percentage": 1.7,
+      "cumulative_percentage": 95.84
+    },
+    {
+      "feature": "Marital_Status",
+      "importance": 0.0145,
+      "percentage": 1.45,
+      "cumulative_percentage": 97.3
+    },
+    {
+      "feature": "Dependent_count",
+      "importance": 0.0132,
+      "percentage": 1.32,
+      "cumulative_percentage": 98.62
+    },
+    {
+      "feature": "Gender",
+      "importance": 0.0093,
+      "percentage": 0.93,
+      "cumulative_percentage": 99.55
+    },
+    {
+      "feature": "Card_Category",
+      "importance": 0.0045,
+      "percentage": 0.45,
+      "cumulative_percentage": 100.0
+    }
+  ],
+  "top_5_features": [
+    "Total_Trans_Amt",
+    "Total_Trans_Ct",
+    "Total_Ct_Chng_Q4_Q1",
+    "Total_Revolving_Bal",
+    "Avg_Utilization_Ratio"
+  ],
+  "total_features_after_encoding": 36,
+  "original_features_count": 19
+}
