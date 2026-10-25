@@ -127,6 +127,25 @@ def test_predict_batch_csv():
     print("[PASS] test_predict_batch_csv passed: Scored CSV shape", result_df.shape)
 
 
+def test_frontend_root():
+    """Verify GET / serves static/index.html."""
+    response = client.get("/")
+    assert response.status_code == 200, f"Expected 200, got {response.status_code}"
+    assert "text/html" in response.headers.get("content-type", "")
+    assert "Credit Card Customer Churn Predictor" in response.text
+    assert "Customer_Age" in response.text
+    print("[PASS] test_frontend_root passed: Served index.html at /")
+
+
+def test_frontend_static():
+    """Verify GET /static/index.html serves the frontend."""
+    response = client.get("/static/index.html")
+    assert response.status_code == 200, f"Expected 200, got {response.status_code}"
+    assert "text/html" in response.headers.get("content-type", "")
+    assert "Credit Card Customer Churn Predictor" in response.text
+    print("[PASS] test_frontend_static passed: Served index.html at /static/index.html")
+
+
 if __name__ == "__main__":
     test_health()
     test_model_info()
@@ -135,4 +154,6 @@ if __name__ == "__main__":
     test_predict_validation_missing_field()
     test_predict_validation_invalid_category()
     test_predict_batch_csv()
-    print("\nALL 7 TESTS PASSED SUCCESSFULLY!")
+    test_frontend_root()
+    test_frontend_static()
+    print("\nALL 9 TESTS PASSED SUCCESSFULLY!")

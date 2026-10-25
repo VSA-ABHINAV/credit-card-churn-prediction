@@ -274,6 +274,8 @@ credit-card-churn-prediction/
 ├── requirements.txt             # Pinned environment dependencies
 ├── data/
 │   └── BankChurners.csv         # Complete customer dataset (10,127 records)
+├── static/
+│   └── index.html               # Single-page web UI dashboard
 ├── src/
 │   ├── __init__.py              # Package initializer
 │   ├── api.py                   # Production FastAPI REST API application

@@ -12,7 +12,8 @@ from pathlib import Path
 from typing import List, Optional, Union
 
 from fastapi import FastAPI, File, HTTPException, UploadFile, status
-from fastapi.responses import StreamingResponse
+from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 import joblib
 import pandas as pd
 from pydantic import BaseModel, Field, field_validator
@@ -28,6 +29,8 @@ logger = logging.getLogger("churn_api")
 BASE_DIR = Path(__file__).resolve().parent.parent
 MODEL_PATH = BASE_DIR / "models" / "final_model.joblib"
 CONFIG_PATH = BASE_DIR / "models" / "final_model_config.json"
+STATIC_DIR = BASE_DIR / "static"
+STATIC_DIR.mkdir(parents=True, exist_ok=True)
 
 # Global runtime artifacts
 model = None
@@ -94,6 +97,21 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan
 )
+
+# Mount static assets directory
+app.mount("/static", StaticFiles(directory=str(STATIC_DIR), html=True), name="static")
+
+
+@app.get("/", response_class=FileResponse)
+async def root():
+    """Serve the single-page HTML frontend."""
+    index_file = STATIC_DIR / "index.html"
+    if not index_file.exists():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Frontend index.html not found in static directory"
+        )
+    return FileResponse(index_file)
 
 
 # Pydantic Schemas

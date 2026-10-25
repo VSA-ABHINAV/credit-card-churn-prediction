@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credit Card Customer Churn Predictor</title>
+    <style>
+        :root {
+            --bg-base: #0b0f19;
+            --bg-surface: #111827;
+            --bg-card: #1f2937;
+            --bg-card-hover: #283548;
+            --border-subtle: #374151;
+            --border-focus: #6366f1;
+            --text-primary: #f9fafb;
+            --text-secondary: #9ca3af;
+            --text-muted: #6b7280;
+            --accent-primary: #4f46e5;
+            --accent-primary-hover: #4338ca;
+            --risk-low: #10b981;
+            --risk-low-bg: rgba(16, 185, 129, 0.15);
+            --risk-med: #f59e0b;
+            --risk-med-bg: rgba(245, 158, 11, 0.15);
+            --risk-high: #ef4444;
+            --risk-high-bg: rgba(239, 68, 68, 0.15);
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-full: 9999px;
+            --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
+            --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            line-height: 1.5;
+            padding: 24px 16px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .header-title h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-title p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+
+        .api-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(31, 41, 55, 0.7);
+            border: 1px solid var(--border-subtle);
+            padding: 6px 14px;
+            border-radius: var(--radius-full);
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .status-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background-color: #6b7280;
+            transition: var(--transition-smooth);
+        }
+
+        .status-dot.online {
+            background-color: var(--risk-low);
+            box-shadow: 0 0 8px var(--risk-low);
+        }
+
+        .status-dot.offline {
+            background-color: var(--risk-high);
+            box-shadow: 0 0 8px var(--risk-high);
+        }
+
+        /* Cards */
+        .card {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow-card);
+            transition: var(--transition-smooth);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .card-title {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Model Info Grid */
+        .model-kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+        }
+
+        .kpi-box {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .kpi-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .kpi-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            word-break: break-word;
+        }
+
+        .kpi-sub {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        /* Profile Pre-loaders */
+        .preset-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding: 12px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            margin-bottom: 20px;
+        }
+
+        .preset-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .preset-btn {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+            padding: 6px 12px;
+            border-radius: var(--radius-md);
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .preset-btn:hover {
+            border-color: var(--border-focus);
+            background-color: var(--bg-card-hover);
+        }
+
+        .preset-btn.btn-danger-light:hover {
+            border-color: var(--risk-high);
+            color: #fca5a5;
+        }
+
+        .preset-btn.btn-success-light:hover {
+            border-color: var(--risk-low);
+            color: #6ee7b7;
+        }
+
+        /* Form Sections */
+        .form-section {
+            margin-bottom: 24px;
+        }
+
+        .section-header {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #818cf8;
+            margin-bottom: 12px;
+            padding-bottom: 6px;
+            border-bottom: 1px dashed var(--border-subtle);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 0.825rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .form-group input,
+        .form-group select {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+            padding: 9px 12px;
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            outline: none;
+            transition: var(--transition-smooth);
+            width: 100%;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+            background-color: var(--bg-card-hover);
+        }
+
+        .form-group select option {
+            background-color: var(--bg-card);
+            color: var(--text-primary);
+        }
+
+        .field-hint {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+
+        /* Buttons */
+        .actions-bar {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-primary);
+            color: #ffffff;
+            border: none;
+            padding: 12px 28px;
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: var(--transition-smooth);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-subtle);
+            padding: 12px 20px;
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .btn-secondary:hover {
+            color: var(--text-primary);
+            border-color: var(--text-secondary);
+        }
+
+        /* Spinner */
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 0.8s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Results Section */
+        #results {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .result-main {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding: 20px;
+            border-radius: var(--radius-lg);
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            margin-bottom: 20px;
+        }
+
+        .badge-large {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: 800;
+            padding: 10px 24px;
+            border-radius: var(--radius-full);
+            letter-spacing: 0.05em;
+        }
+
+        .badge-high {
+            background-color: var(--risk-high-bg);
+            color: var(--risk-high);
+            border: 2px solid var(--risk-high);
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.25);
+        }
+
+        .badge-medium {
+            background-color: var(--risk-med-bg);
+            color: var(--risk-med);
+            border: 2px solid var(--risk-med);
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.25);
+        }
+
+        .badge-low {
+            background-color: var(--risk-low-bg);
+            color: var(--risk-low);
+            border: 2px solid var(--risk-low);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.25);
+        }
+
+        .prob-visual {
+            flex: 1;
+            min-width: 260px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .prob-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .prob-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 12px;
+            background-color: var(--bg-base);
+            border-radius: var(--radius-full);
+            overflow: hidden;
+            position: relative;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: var(--radius-full);
+            transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.4s ease;
+        }
+
+        .threshold-marker {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 30%;
+            width: 2px;
+            background-color: rgba(255, 255, 255, 0.8);
+            z-index: 2;
+        }
+
+        .recommendation-box {
+            padding: 16px 20px;
+            border-radius: var(--radius-md);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            border-left: 4px solid transparent;
+        }
+
+        .rec-high {
+            background: rgba(239, 68, 68, 0.08);
+            border-color: var(--risk-high);
+            color: #fca5a5;
+        }
+
+        .rec-med {
+            background: rgba(245, 158, 11, 0.08);
+            border-color: var(--risk-med);
+            color: #fcd34d;
+        }
+
+        .rec-low {
+            background: rgba(16, 185, 129, 0.08);
+            border-color: var(--risk-low);
+            color: #6ee7b7;
+        }
+
+        /* Error Banner */
+        .error-banner {
+            background-color: rgba(239, 68, 68, 0.15);
+            border: 1px solid var(--risk-high);
+            color: #fca5a5;
+            padding: 14px 18px;
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        /* Collapsible details */
+        details {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 12px 16px;
+            margin-top: 16px;
+        }
+
+        details summary {
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+        details pre {
+            margin-top: 12px;
+            background-color: var(--bg-base);
+            padding: 12px;
+            border-radius: var(--radius-md);
+            font-family: Consolas, Monaco, "Courier New", monospace;
+            font-size: 0.8rem;
+            color: #a5b4fc;
+            overflow-x: auto;
+            border: 1px solid var(--border-subtle);
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        /* Responsive overrides */
+        @media (max-width: 768px) {
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+            .header-title h1 {
+                font-size: 1.4rem;
+            }
+            .result-main {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .badge-large {
+                font-size: 1.25rem;
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="header-title">
+                <h1>💳 Credit Card Customer Churn Predictor</h1>
+                <p>Proactive Retention Intelligence & Machine Learning Risk Engine</p>
+            </div>
+            <div class="api-status" id="api-status-badge">
+                <span class="status-dot" id="status-dot"></span>
+                <span id="status-text">Checking API...</span>
+            </div>
+        </header>
+
+        <!-- Model Info Card -->
+        <section id="model-info" class="card">
+            <div class="card-header">
+                <h2 class="card-title">⚙️ Production Model Telemetry</h2>
+                <span style="font-size: 0.8rem; color: var(--text-muted);">Loaded via <code>GET /model-info</code></span>
+            </div>
+            <div class="model-kpi-grid">
+                <div class="kpi-box">
+                    <span class="kpi-label">Algorithm</span>
+                    <span class="kpi-value" id="kpi-model-type">Loading...</span>
+                    <span class="kpi-sub">400 Estimators (Tuned)</span>
+                </div>
+                <div class="kpi-box">
+                    <span class="kpi-label">Decision Threshold</span>
+                    <span class="kpi-value" id="kpi-threshold" style="color: #818cf8;">Loading...</span>
+                    <span class="kpi-sub">Optimized for 90% Recall</span>
+                </div>
+                <div class="kpi-box">
+                    <span class="kpi-label">Training Size</span>
+                    <span class="kpi-value" id="kpi-training-rows">Loading...</span>
+                    <span class="kpi-sub">BankChurners Dataset</span>
+                </div>
+                <div class="kpi-box">
+                    <span class="kpi-label">Features Schema</span>
+                    <span class="kpi-value" id="kpi-features-count">Loading...</span>
+                    <span class="kpi-sub">Behavioral & Account Signals</span>
+                </div>
+                <div class="kpi-box">
+                    <span class="kpi-label">Pipeline Version</span>
+                    <span class="kpi-value" id="kpi-version" style="font-size: 0.85rem; font-weight: 600;">Loading...</span>
+                    <span class="kpi-sub" id="kpi-sklearn">scikit-learn 1.9.1</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Prediction Form Card -->
+        <section id="prediction-form" class="card">
+            <div class="card-header">
+                <h2 class="card-title">📝 Customer Account Profile</h2>
+            </div>
+
+            <!-- Profile Pre-sets -->
+            <div class="preset-bar">
+                <span class="preset-label">Test Profiles:</span>
+                <button type="button" class="preset-btn btn-success-light" id="btn-load-loyal" onclick="loadProfile('loyal')">
+                    🟢 Load Loyal Customer (Low Risk)
+                </button>
+                <button type="button" class="preset-btn btn-danger-light" id="btn-load-churn" onclick="loadProfile('churner')">
+                    🔴 Load Attriting Customer (High Risk)
+                </button>
+                <button type="button" class="preset-btn" id="btn-clear-form" onclick="resetForm()">
+                    ↺ Clear
+                </button>
+            </div>
+
+            <div class="error-banner" id="error-banner"></div>
+
+            <form id="churn-form" onsubmit="handleFormSubmit(event)">
+                <!-- Section 1: Demographics -->
+                <div class="form-section">
+                    <div class="section-header">👤 Customer Demographics</div>
+                    <div class="grid-3">
+                        <div class="form-group">
+                            <label for="Customer_Age">Customer Age (18 - 100)*</label>
+                            <input type="number" id="Customer_Age" name="Customer_Age" min="18" max="100" required value="45">
+                            <span class="field-hint">Primary cardholder age in years</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="Gender">Gender*</label>
+                            <select id="Gender" name="Gender" required>
+                                <option value="M">Male (M)</option>
+                                <option value="F">Female (F)</option>
+                            </select>
+                            <span class="field-hint">Mapped internally to binary</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="Dependent_count">Dependent Count (0 - 10)*</label>
+                            <input type="number" id="Dependent_count" name="Dependent_count" min="0" max="10" required value="3">
+                            <span class="field-hint">Number of financial dependents</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="Education_Level">Education Level*</label>
+                            <select id="Education_Level" name="Education_Level" required>
+                                <option value="High School">High School</option>
+                                <option value="Graduate" selected>Graduate</option>
+                                <option value="College">College</option>
+                                <option value="Uneducated">Uneducated</option>
+                                <option value="Post-Graduate">Post-Graduate</option>
+                                <option value="Doctorate">Doctorate</option>
+                                <option value="Unknown">Unknown</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="Marital_Status">Marital Status*</label>
+                            <select id="Marital_Status" name="Marital_Status" required>
+                                <option value="Married" selected>Married</option>
+                                <option value="Single">Single</option>
+                                <option value="Divorced">Divorced</option>
+                                <option value="Unknown">Unknown</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="Income_Category">Annual Income Category*</label>
+                            <select id="Income_Category" name="Income_Category" required>
+                                <option value="Less than $40K">Less than $40K</option>
+                                <option value="$40K - $60K">$40K - $60K</option>
+                                <option value="$60K - $80K" selected>$60K - $80K</option>
+                                <option value="$80K - $120K">$80K - $120K</option>
+                                <option value="$120K +">$120K +</option>
+                                <option value="Unknown">Unknown</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Account & Relationship -->
+                <div class="form-section">
+                    <div class="section-header">🏛️ Account & Relationship Architecture</div>
+                    <div class="grid-3">
+                        <div class="form-group">
+                            <label for="Card_Category">Card Tier Category*</label>
+                            <select id="Card_Category" name="Card_Category" required>
+                                <option value="Blue" selected>Blue</option>
+                                <option value="Silver">Silver</option>
+                                <option value="Gold">Gold</option>
+                                <option value="Platinum">Platinum</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="Months_on_book">Months on Book (Tenure)*</label>
+                            <input type="number" id="Months_on_book" name="Months_on_book" min="0" required value="39">
+                            <span class="field-hint">Total relationship length in months</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="Total_Relationship_Count">Total Products Held (1 - 10)*</label>
+                            <input type="number" id="Total_Relationship_Count" name="Total_Relationship_Count" min="1" max="10" required value="5">
+                            <span class="field-hint">Cross-sell products with the bank</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="Credit_Limit">Credit Limit ($)*</label>
+                            <input type="number" id="Credit_Limit" name="Credit_Limit" min="0" step="0.1" required value="12691.0">
+                            <span class="field-hint">Total revolving line of credit</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="Total_Revolving_Bal">Total Revolving Balance ($)*</label>
+                            <input type="number" id="Total_Revolving_Bal" name="Total_Revolving_Bal" min="0" required value="777">
+                            <span class="field-hint">Key indicator: disengagers hover near $0</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="Avg_Open_To_Buy">Avg Open To Buy ($)*</label>
+                            <input type="number" id="Avg_Open_To_Buy" name="Avg_Open_To_Buy" step="0.1" required value="11914.0">
+                            <span class="field-hint">Unused available line</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Behavioral Signals -->
+                <div class="form-section">
+                    <div class="section-header">⚡ Behavioral Disengagement Signals (6-Month Horizon)</div>
+                    <div class="grid-3">
+                        <div class="form-group">
+                            <label for="Months_Inactive_12_mon">Months Inactive Past Year (0 - 12)*</label>
+                            <input type="number" id="Months_Inactive_12_mon" name="Months_Inactive_12_mon" min="0" max="12" required value="1">
+                            <span class="field-hint">Months with zero transaction activity</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="Contacts_Count_12_mon">Customer Contacts Past Year (0 - 50)*</label>
+                            <input type="number" id="Contacts_Count_12_mon" name="Contacts_Count_12_mon" min="0" max="50" required value="3">
+                            <span class="field-hint">Complaints / customer care touchpoints</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="Total_Amt_Chng_Q4_Q1">Spend Change Ratio (Q4 over Q1)*</label>
+                            <input type="number" id="Total_Amt_Chng_Q4_Q1" name="Total_Amt_Chng_Q4_Q1" step="0.001" required value="1.335">
+                            <span class="field-hint">Trajectory in dollar volume</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="Total_Trans_Amt">Total 12-Month Spend ($)*</label>
+                            <input type="number" id="Total_Trans_Amt" name="Total_Trans_Amt" min="0" required value="1144">
+                            <span class="field-hint">#1 feature importance driver (18.1%)</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="Total_Trans_Ct">Total 12-Month Transaction Count*</label>
+                            <input type="number" id="Total_Trans_Ct" name="Total_Trans_Ct" min="0" required value="42">
+                            <span class="field-hint">#2 feature importance driver (16.1%)</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="Total_Ct_Chng_Q4_Q1">Transaction Count Change (Q4 over Q1)*</label>
+                            <input type="number" id="Total_Ct_Chng_Q4_Q1" name="Total_Ct_Chng_Q4_Q1" step="0.001" required value="1.625">
+                            <span class="field-hint">#3 feature driver: card swipe frequency drop</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="Avg_Utilization_Ratio">Average Card Utilization (0.00 - 1.00)*</label>
+                            <input type="number" id="Avg_Utilization_Ratio" name="Avg_Utilization_Ratio" min="0" max="1" step="0.001" required value="0.061">
+                            <span class="field-hint">Credit utilized ratio</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="actions-bar">
+                    <button type="submit" class="btn-primary" id="btn-predict">
+                        <span class="spinner" id="btn-spinner"></span>
+                        <span>🔍 Score Churn Risk</span>
+                    </button>
+                    <button type="button" class="btn-secondary" onclick="resetForm()">Reset Fields</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Prediction Results Card -->
+        <section id="results" class="card hidden">
+            <div class="card-header">
+                <h2 class="card-title">📊 ML Risk Assessment & Recommendation</h2>
+                <span id="res-timestamp" style="font-size: 0.8rem; color: var(--text-muted);"></span>
+            </div>
+
+            <div class="result-main">
+                <div id="risk-badge" class="badge-large badge-low">
+                    <span id="risk-icon">✅</span>
+                    <span id="risk-text">LOW RISK</span>
+                </div>
+
+                <div class="prob-visual">
+                    <div class="prob-header">
+                        <span>Predicted Churn Probability</span>
+                        <span class="prob-value" id="res-prob-val">0.0%</span>
+                    </div>
+                    <div class="progress-track" title="Threshold marker at 30%">
+                        <div class="threshold-marker"></div>
+                        <div class="progress-fill" id="prob-bar"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted);">
+                        <span>0%</span>
+                        <span style="color: #818cf8; font-weight: 600;">Threshold: 30.0%</span>
+                        <span>100%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommendation Alert -->
+            <div class="recommendation-box rec-low" id="recommendation-alert">
+                <strong>Prescriptive Retention Action:</strong>
+                <span id="rec-text">Loading recommendation...</span>
+            </div>
+
+            <!-- Detail Grid -->
+            <div class="model-kpi-grid" style="margin-top: 16px;">
+                <div class="kpi-box">
+                    <span class="kpi-label">Decision Flag</span>
+                    <span class="kpi-value" id="res-flag">0</span>
+                    <span class="kpi-sub" id="res-flag-sub">No Intervention</span>
+                </div>
+                <div class="kpi-box">
+                    <span class="kpi-label">Applied Threshold</span>
+                    <span class="kpi-value" id="res-threshold">0.30</span>
+                    <span class="kpi-sub">Business-Tuned Cutoff</span>
+                </div>
+                <div class="kpi-box">
+                    <span class="kpi-label">Risk Category</span>
+                    <span class="kpi-value" id="res-category">LOW</span>
+                    <span class="kpi-sub">&lt; 30% Probability</span>
+                </div>
+                <div class="kpi-box">
+                    <span class="kpi-label">Pipeline Version</span>
+                    <span class="kpi-value" id="res-model-version" style="font-size: 0.8rem;">-</span>
+                    <span class="kpi-sub">Exported Artifact</span>
+                </div>
+            </div>
+
+            <!-- Collapsible Raw Data -->
+            <details>
+                <summary>🔍 Inspect Raw API Response & Transmission Payload</summary>
+                <pre id="raw-json-output">// JSON output will appear here</pre>
+            </details>
+        </section>
+
+        <footer>
+            Credit Card Churn Prediction System &bull; Production Machine Learning Architecture &bull; Random Forest Pipeline
+        </footer>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        // API Configuration (defaults to host origin or localhost:8000 fallback)
+        const API_BASE = window.location.origin.includes('http') ? window.location.origin : 'http://127.0.0.1:8000';
+
+        // Predefined Customer Profiles for 1-Click Evaluation
+        const PROFILES = {
+            loyal: {
+                Customer_Age: 45,
+                Gender: "M",
+                Dependent_count: 3,
+                Education_Level: "High School",
+                Marital_Status: "Married",
+                Income_Category: "$60K - $80K",
+                Card_Category: "Blue",
+                Months_on_book: 39,
+                Total_Relationship_Count: 5,
+                Months_Inactive_12_mon: 1,
+                Contacts_Count_12_mon: 3,
+                Credit_Limit: 12691.0,
+                Total_Revolving_Bal: 777,
+                Avg_Open_To_Buy: 11914.0,
+                Total_Amt_Chng_Q4_Q1: 1.335,
+                Total_Trans_Amt: 1144,
+                Total_Trans_Ct: 42,
+                Total_Ct_Chng_Q4_Q1: 1.625,
+                Avg_Utilization_Ratio: 0.061
+            },
+            churner: {
+                Customer_Age: 51,
+                Gender: "F",
+                Dependent_count: 2,
+                Education_Level: "Graduate",
+                Marital_Status: "Single",
+                Income_Category: "Less than $40K",
+                Card_Category: "Blue",
+                Months_on_book: 43,
+                Total_Relationship_Count: 2,
+                Months_Inactive_12_mon: 4,
+                Contacts_Count_12_mon: 4,
+                Credit_Limit: 2500.0,
+                Total_Revolving_Bal: 0,
+                Avg_Open_To_Buy: 2500.0,
+                Total_Amt_Chng_Q4_Q1: 0.420,
+                Total_Trans_Amt: 780,
+                Total_Trans_Ct: 16,
+                Total_Ct_Chng_Q4_Q1: 0.350,
+                Avg_Utilization_Ratio: 0.000
+            }
+        };
+
+        // Initialize application on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchModelInfo();
+        });
+
+        // 1. Fetch Model Telemetry (/model-info)
+        async function fetchModelInfo() {
+            const statusDot = document.getElementById('status-dot');
+            const statusText = document.getElementById('status-text');
+
+            try {
+                const response = await fetch(`${API_BASE}/model-info`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const data = await response.json();
+
+                // Populate KPI boxes
+                document.getElementById('kpi-model-type').textContent = data.model_type || 'RandomForest';
+                document.getElementById('kpi-threshold').textContent = Number(data.decision_threshold).toFixed(2);
+                document.getElementById('kpi-training-rows').textContent = Number(data.training_rows || 10127).toLocaleString();
+                document.getElementById('kpi-features-count').textContent = `${(data.expected_input_columns || []).length} Columns`;
+                
+                const createdDate = data.created_utc ? data.created_utc.split('T')[0] : 'Production';
+                document.getElementById('kpi-version').textContent = createdDate;
+                document.getElementById('kpi-sklearn').textContent = `scikit-learn ${data.sklearn_version || '1.9.1'}`;
+
+                // Mark API online
+                statusDot.className = 'status-dot online';
+                statusText.textContent = 'API Connected (v1.0.0)';
+            } catch (err) {
+                console.warn('Could not connect to /model-info:', err);
+                statusDot.className = 'status-dot offline';
+                statusText.textContent = 'API Offline';
+                document.getElementById('kpi-model-type').textContent = 'RandomForest';
+                document.getElementById('kpi-threshold').textContent = '0.30';
+                document.getElementById('kpi-training-rows').textContent = '10,127';
+                document.getElementById('kpi-features-count').textContent = '19 Features';
+                document.getElementById('kpi-version').textContent = 'Local Standalone';
+            }
+        }
+
+        // 2. Load Preset Customer Profile
+        function loadProfile(type) {
+            const profile = PROFILES[type];
+            if (!profile) return;
+
+            for (const [key, val] of Object.entries(profile)) {
+                const input = document.getElementById(key);
+                if (input) {
+                    input.value = val;
+                }
+            }
+
+            // Hide previous results on profile change
+            document.getElementById('results').classList.add('hidden');
+            hideError();
+        }
+
+        // 3. Clear Form Fields
+        function resetForm() {
+            document.getElementById('churn-form').reset();
+            document.getElementById('results').classList.add('hidden');
+            hideError();
+        }
+
+        // 4. Handle Form Submission to POST /predict
+        async function handleFormSubmit(event) {
+            event.preventDefault();
+            hideError();
+
+            const submitBtn = document.getElementById('btn-predict');
+            const spinner = document.getElementById('btn-spinner');
+            submitBtn.disabled = true;
+            spinner.style.display = 'inline-block';
+
+            // Gather inputs into properly cast payload
+            const payload = {
+                Customer_Age: parseInt(document.getElementById('Customer_Age').value, 10),
+                Gender: document.getElementById('Gender').value,
+                Dependent_count: parseInt(document.getElementById('Dependent_count').value, 10),
+                Education_Level: document.getElementById('Education_Level').value,
+                Marital_Status: document.getElementById('Marital_Status').value,
+                Income_Category: document.getElementById('Income_Category').value,
+                Card_Category: document.getElementById('Card_Category').value,
+                Months_on_book: parseInt(document.getElementById('Months_on_book').value, 10),
+                Total_Relationship_Count: parseInt(document.getElementById('Total_Relationship_Count').value, 10),
+                Months_Inactive_12_mon: parseInt(document.getElementById('Months_Inactive_12_mon').value, 10),
+                Contacts_Count_12_mon: parseInt(document.getElementById('Contacts_Count_12_mon').value, 10),
+                Credit_Limit: parseFloat(document.getElementById('Credit_Limit').value),
+                Total_Revolving_Bal: parseInt(document.getElementById('Total_Revolving_Bal').value, 10),
+                Avg_Open_To_Buy: parseFloat(document.getElementById('Avg_Open_To_Buy').value),
+                Total_Amt_Chng_Q4_Q1: parseFloat(document.getElementById('Total_Amt_Chng_Q4_Q1').value),
+                Total_Trans_Amt: parseInt(document.getElementById('Total_Trans_Amt').value, 10),
+                Total_Trans_Ct: parseInt(document.getElementById('Total_Trans_Ct').value, 10),
+                Total_Ct_Chng_Q4_Q1: parseFloat(document.getElementById('Total_Ct_Chng_Q4_Q1').value),
+                Avg_Utilization_Ratio: parseFloat(document.getElementById('Avg_Utilization_Ratio').value)
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/predict`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errData = await response.json().catch(() => ({}));
+                    const detail = errData.detail ? JSON.stringify(errData.detail) : `HTTP ${response.status}`;
+                    throw new Error(`Inference error: ${detail}`);
+                }
+
+                const result = await response.json();
+                displayResults(result, payload);
+            } catch (err) {
+                console.error(err);
+                showError(err.message || 'Failed to communicate with prediction service');
+            } finally {
+                submitBtn.disabled = false;
+                spinner.style.display = 'none';
+            }
+        }
+
+        // 5. Render Prediction Outcome
+        function displayResults(data, inputPayload) {
+            const pred = (data.predictions && data.predictions[0]) ? data.predictions[0] : null;
+            if (!pred) {
+                showError('Malformed prediction response from server');
+                return;
+            }
+
+            const resultsSec = document.getElementById('results');
+            resultsSec.classList.remove('hidden');
+
+            const probPercent = (pred.churn_probability * 100).toFixed(1);
+            document.getElementById('res-prob-val').textContent = `${probPercent}%`;
+
+            // Progress bar animation
+            const bar = document.getElementById('prob-bar');
+            bar.style.width = `${Math.min(probPercent, 100)}%`;
+
+            // Elements for badge & alert styling
+            const badge = document.getElementById('risk-badge');
+            const icon = document.getElementById('risk-icon');
+            const text = document.getElementById('risk-text');
+            const recAlert = document.getElementById('recommendation-alert');
+            const recText = document.getElementById('rec-text');
+
+            if (pred.risk_level === 'HIGH') {
+                badge.className = 'badge-large badge-high';
+                icon.textContent = '🚨';
+                text.textContent = 'HIGH RISK';
+                bar.style.backgroundColor = 'var(--risk-high)';
+                recAlert.className = 'recommendation-box rec-high';
+                recText.textContent = 'Immediate proactive outreach recommended. Customer is experiencing sharp disengagement (drop in transaction counts and zero revolving balance). Dispatch retention incentive offer (e.g. promotional cash-back or fee waiver) within 48 hours.';
+            } else if (pred.risk_level === 'MEDIUM') {
+                badge.className = 'badge-large badge-medium';
+                icon.textContent = '⚠️';
+                text.textContent = 'MEDIUM RISK';
+                bar.style.backgroundColor = 'var(--risk-med)';
+                recAlert.className = 'recommendation-box rec-med';
+                recText.textContent = 'Elevated attrition risk. Account exceeds the 0.30 decision threshold. Include in upcoming weekly marketing re-engagement campaign and monitor quarterly usage changes.';
+            } else {
+                badge.className = 'badge-large badge-low';
+                icon.textContent = '✅';
+                text.textContent = 'LOW RISK';
+                bar.style.backgroundColor = 'var(--risk-low)';
+                recAlert.className = 'recommendation-box rec-low';
+                recText.textContent = 'Customer account is healthy and active. Regular relationship maintenance; account is currently a good candidate for cross-sell products or credit limit increases.';
+            }
+
+            // Telemetry values
+            document.getElementById('res-flag').textContent = pred.churn_risk_flag;
+            document.getElementById('res-flag-sub').textContent = pred.churn_risk_flag === 1 ? 'Action Required (Flagged)' : 'Safe / Retained';
+            document.getElementById('res-threshold').textContent = Number(data.threshold_used).toFixed(2);
+            document.getElementById('res-category').textContent = pred.risk_level;
+            document.getElementById('res-model-version').textContent = data.model_version || 'Production';
+            document.getElementById('res-timestamp').textContent = `Evaluated at: ${new Date().toLocaleTimeString()}`;
+
+            // Collapsible raw payload
+            document.getElementById('raw-json-output').textContent = JSON.stringify({
+                sent_payload: inputPayload,
+                api_response: data
+            }, null, 2);
+
+            // Smooth scroll to results
+            resultsSec.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function showError(msg) {
+            const banner = document.getElementById('error-banner');
+            banner.textContent = msg;
+            banner.style.display = 'block';
+        }
+
+        function hideError() {
+            const banner = document.getElementById('error-banner');
+            banner.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
