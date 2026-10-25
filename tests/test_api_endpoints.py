@@ -132,7 +132,7 @@ def test_frontend_root():
     response = client.get("/")
     assert response.status_code == 200, f"Expected 200, got {response.status_code}"
     assert "text/html" in response.headers.get("content-type", "")
-    assert "Credit Card Customer Churn Predictor" in response.text
+    assert "Customer Churn Risk Intelligence Engine" in response.text
     assert "Customer_Age" in response.text
     print("[PASS] test_frontend_root passed: Served index.html at /")
 
@@ -142,7 +142,7 @@ def test_frontend_static():
     response = client.get("/static/index.html")
     assert response.status_code == 200, f"Expected 200, got {response.status_code}"
     assert "text/html" in response.headers.get("content-type", "")
-    assert "Credit Card Customer Churn Predictor" in response.text
+    assert "Customer Churn Risk Intelligence Engine" in response.text
     print("[PASS] test_frontend_static passed: Served index.html at /static/index.html")
 
 
