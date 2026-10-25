@@ -272,10 +272,16 @@ credit-card-churn-prediction/
 ├── LICENSE                      # MIT Open Source License
 ├── .gitignore                   # Standard Python/IDE/model exclusions
 ├── requirements.txt             # Pinned environment dependencies
+├── run.txt                      # Quick execution guide and commands
+├── fetch_stitch.py              # Stitch design synchronization helper
 ├── data/
 │   └── BankChurners.csv         # Complete customer dataset (10,127 records)
 ├── static/
 │   └── index.html               # Single-page web UI dashboard
+├── stitch_export/
+│   └── cb2280fa88b643339d70e848de622321.html # Archived Stitch design snapshot
+├── tests/
+│   └── test_api_endpoints.py    # Automated test suite (9 test cases)
 ├── src/
 │   ├── __init__.py              # Package initializer
 │   ├── api.py                   # Production FastAPI REST API application

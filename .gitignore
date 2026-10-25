@@ -26,6 +26,9 @@ Thumbs.db
 .idea/
 *.swp
 
+# Testing
+.pytest_cache/
+
 # Local review and prompt documents (excluded from git repository)
 report.md
 prompt.md
