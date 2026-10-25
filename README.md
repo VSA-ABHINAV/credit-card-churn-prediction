@@ -106,7 +106,7 @@ All visual evaluations are generated as publication-ready PNGs in the `charts/` 
 ### 1. Installation
 Clone the repository and install dependencies:
 ```bash
-git clone https://github.com/VSABHINAV/credit-card-churn-prediction.git
+git clone https://github.com/VSA-ABHINAV/credit-card-churn-prediction.git
 cd credit-card-churn-prediction
 pip install -r requirements.txt
 ```
@@ -145,6 +145,125 @@ new_customers["churn_risk_flag"] = churn_predictions
 
 ---
 
+## 🌐 API Usage (FastAPI)
+
+A high-performance production REST API is implemented in `src/api.py` using FastAPI and Pydantic. It provides real-time single and batch predictions, health checks, metadata inspection, and bulk CSV scoring.
+
+### 1. Start the Server
+Start the API locally using Uvicorn:
+```bash
+uvicorn src.api:app --host 0.0.0.0 --port 8000 --reload
+# Or run with python directly
+python src/api.py
+```
+Interactive Swagger UI documentation is available at `http://localhost:8000/docs`.
+
+### 2. Available Endpoints
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/health` | Liveness & readiness probe (reports model load status and version) |
+| `GET` | `/model-info` | Returns model hyperparameters, decision threshold (0.30), and feature schema |
+| `POST` | `/predict` | Predict churn probability, risk flag, and risk level (`LOW`, `MEDIUM`, `HIGH`) for single customer or list |
+| `POST` | `/predict/batch` | Bulk scoring via CSV file upload (`multipart/form-data`), returns downloadable CSV |
+
+### 3. Example `curl` Commands
+
+#### Single Customer Prediction:
+```bash
+curl -X POST http://localhost:8000/predict \
+  -H "Content-Type: application/json" \
+  -d '{
+    "Customer_Age": 45,
+    "Gender": "M",
+    "Dependent_count": 3,
+    "Education_Level": "High School",
+    "Marital_Status": "Married",
+    "Income_Category": "$60K - $80K",
+    "Card_Category": "Blue",
+    "Months_on_book": 39,
+    "Total_Relationship_Count": 5,
+    "Months_Inactive_12_mon": 1,
+    "Contacts_Count_12_mon": 3,
+    "Credit_Limit": 12691.0,
+    "Total_Revolving_Bal": 777,
+    "Avg_Open_To_Buy": 11914.0,
+    "Total_Amt_Chng_Q4_Q1": 1.335,
+    "Total_Trans_Amt": 1144,
+    "Total_Trans_Ct": 42,
+    "Total_Ct_Chng_Q4_Q1": 1.625,
+    "Avg_Utilization_Ratio": 0.061
+  }'
+```
+
+**Response (`200 OK`):**
+```json
+{
+  "predictions": [
+    {
+      "churn_probability": 0.0713,
+      "churn_risk_flag": 0,
+      "risk_level": "LOW"
+    }
+  ],
+  "threshold_used": 0.3,
+  "model_version": "2026-10-24T14:41:48.514082+00:00"
+}
+```
+
+#### Batch JSON Array Prediction:
+```bash
+curl -X POST http://localhost:8000/predict \
+  -H "Content-Type: application/json" \
+  -d '[
+    {"Customer_Age": 45, "Gender": "M", "Dependent_count": 3, ...},
+    {"Customer_Age": 55, "Gender": "F", "Dependent_count": 1, ...}
+  ]'
+```
+
+#### Bulk CSV Scoring:
+```bash
+curl -X POST http://localhost:8000/predict/batch \
+  -F "file=@data/BankChurners.csv" \
+  --output scored_customers.csv
+```
+*Appends `churn_probability`, `churn_risk_flag`, and `risk_level` directly to the returned CSV.*
+
+### 4. Python `requests` Example
+```python
+import requests
+
+customer_data = {
+    "Customer_Age": 45,
+    "Gender": "M",
+    "Dependent_count": 3,
+    "Education_Level": "High School",
+    "Marital_Status": "Married",
+    "Income_Category": "$60K - $80K",
+    "Card_Category": "Blue",
+    "Months_on_book": 39,
+    "Total_Relationship_Count": 5,
+    "Months_Inactive_12_mon": 1,
+    "Contacts_Count_12_mon": 3,
+    "Credit_Limit": 12691.0,
+    "Total_Revolving_Bal": 777,
+    "Avg_Open_To_Buy": 11914.0,
+    "Total_Amt_Chng_Q4_Q1": 1.335,
+    "Total_Trans_Amt": 1144,
+    "Total_Trans_Ct": 42,
+    "Total_Ct_Chng_Q4_Q1": 1.625,
+    "Avg_Utilization_Ratio": 0.061
+}
+
+response = requests.post("http://localhost:8000/predict", json=customer_data)
+result = response.json()
+print("Risk Level:", result["predictions"][0]["risk_level"])
+print("Churn Probability:", result["predictions"][0]["churn_probability"])
+print("Flag:", result["predictions"][0]["churn_risk_flag"])
+```
+
+---
+
 ## 📁 Repository Structure
 
 ```
@@ -153,11 +272,11 @@ credit-card-churn-prediction/
 ├── LICENSE                      # MIT Open Source License
 ├── .gitignore                   # Standard Python/IDE/model exclusions
 ├── requirements.txt             # Pinned environment dependencies
-├── report.md                    # Detailed model evaluation and decision report
 ├── data/
 │   └── BankChurners.csv         # Complete customer dataset (10,127 records)
 ├── src/
 │   ├── __init__.py              # Package initializer
+│   ├── api.py                   # Production FastAPI REST API application
 │   ├── preprocessing.py         # Modular preprocessing and column transformer logic
 │   ├── evaluate_models.py       # Baseline evaluation script (RF vs Logistic Regression)
 │   ├── feature_importance.py    # Feature importance extraction and aggregation
